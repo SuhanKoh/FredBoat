@@ -42,6 +42,8 @@ import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -52,13 +54,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SkipCommand extends Command implements IMusicCommand, ICommandRestricted {
+
+    private static final Logger log = LoggerFactory.getLogger(SkipCommand.class);
+
     private static final String TRACK_RANGE_REGEX = "^(0?\\d+)-(0?\\d+)$";
     private static final Pattern trackRangePattern = Pattern.compile(TRACK_RANGE_REGEX);
 
     /**
      * Represents the relationship between a <b>guild's id</b> and <b>skip cooldown</b>.
      */
-    private static Map<String, Long> guildIdToLastSkip = new HashMap<String, Long>();
+    private static Map<Long, Long> guildIdToLastSkip = new HashMap<>();
 
     /**
      * The default cooldown for calling the {@link #onInvoke} method in milliseconds.
@@ -76,9 +81,10 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
         }
 
         if (isOnCooldown(guild)) {
+            log.debug("Ignored skip due to being on cooldown");
             return;
         } else {
-            guildIdToLastSkip.put(guild.getId(), System.currentTimeMillis());
+            guildIdToLastSkip.put(guild.getIdLong(), System.currentTimeMillis());
         }
 
         if (args.length == 1) {
@@ -100,8 +106,8 @@ public class SkipCommand extends Command implements IMusicCommand, ICommandRestr
      * {@link #SKIP_COOLDOWN}; otherwise, {@code false}.
      */
     private boolean isOnCooldown(Guild guild) {
-        long currentTIme = System.currentTimeMillis();
-        return currentTIme - guildIdToLastSkip.getOrDefault(guild.getId(), 0L) <= SKIP_COOLDOWN;
+        long currentTime = System.currentTimeMillis();
+        return currentTime - guildIdToLastSkip.getOrDefault(guild.getIdLong(), 0L) <= SKIP_COOLDOWN;
     }
 
     private void skipGivenIndex(GuildPlayer player, TextChannel channel, Member invoker, String[] args) {
