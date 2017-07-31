@@ -34,14 +34,15 @@ import fredboat.agent.DBConnectionWatchdogAgent;
 import fredboat.agent.ShardWatchdogAgent;
 import fredboat.api.API;
 import fredboat.api.OAuthManager;
-import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.audio.player.GuildPlayer;
 import fredboat.audio.player.LavalinkManager;
 import fredboat.audio.player.PlayerRegistry;
+import fredboat.audio.queue.MusicPersistenceHandler;
 import fredboat.commandmeta.CommandRegistry;
 import fredboat.commandmeta.init.MainCommandInitializer;
 import fredboat.commandmeta.init.MusicCommandInitializer;
 import fredboat.db.DatabaseManager;
+import fredboat.db.DatabaseNotReadyException;
 import fredboat.event.EventListenerBoat;
 import fredboat.event.EventListenerSelf;
 import fredboat.event.ShardWatchdogListener;
@@ -422,17 +423,16 @@ public abstract class FredBoat {
         return JDAUtil.countAllUniqueUsers(shards, biggestUserCount);
     }
 
-    public static TextChannel getTextChannelById(String id) {
+    public static TextChannel getTextChannelById(long id) {
         for (FredBoat fb : shards) {
-            for (TextChannel channel : fb.getJda().getTextChannels()) {
-                if (channel.getId().equals(id)) return channel;
-            }
+            TextChannel tc = fb.getJda().getTextChannelById(id);
+            if (tc != null) return tc;
         }
 
         return null;
     }
 
-    public static VoiceChannel getVoiceChannelById(String id) {
+    public static VoiceChannel getVoiceChannelById(long id) {
         for (FredBoat fb : shards) {
             for (VoiceChannel channel : fb.getJda().getVoiceChannels()) {
                 if (channel.getId().equals(id)) return channel;
@@ -522,7 +522,11 @@ public abstract class FredBoat {
         }
     }
 
-    public static DatabaseManager getDbManager() {
+    public static DatabaseManager obtainAvailableDbManager() throws DatabaseNotReadyException {
+
+        if (dbManager == null || !dbManager.isAvailable()) {
+            throw new DatabaseNotReadyException("The database is not available currently. Please try again later.");
+        }
         return dbManager;
     }
 
