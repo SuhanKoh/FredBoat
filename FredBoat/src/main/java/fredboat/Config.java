@@ -303,6 +303,14 @@ public class Config {
         return distribution;
     }
 
+    public boolean isPatronDistribution() {
+        return distribution == DistributionEnum.PATRON;
+    }
+
+    public boolean isDevDistribution() {
+        return distribution == DistributionEnum.DEVELOPMENT;
+    }
+
     public String getBotToken() {
         return botToken;
     }
