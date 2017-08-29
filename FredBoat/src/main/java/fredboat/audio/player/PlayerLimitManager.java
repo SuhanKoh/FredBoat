@@ -14,7 +14,7 @@ public class PlayerLimitManager {
         if (guildPlayer != null && guildPlayer.getSongCount() > 0)
             return true;
 
-        return limit > 0
+        return limit < 0
                 || PlayerRegistry.getPlayingPlayers().size() < limit;
 
     }
