@@ -231,7 +231,7 @@ public class Config {
             testBotToken = (String) creds.getOrDefault("testToken", "");
             testChannelId = creds.getOrDefault("testChannelId", "") + "";
 
-            PlayerLimitManager.setLimit((Integer) creds.getOrDefault("playerLimit", -1));
+            PlayerLimitManager.setLimit((Integer) config.getOrDefault("playerLimit", -1));
 
             useSshTunnel = (boolean) creds.getOrDefault("useSshTunnel", false);
             sshHost = (String) creds.getOrDefault("sshHost", "localhost:22");
