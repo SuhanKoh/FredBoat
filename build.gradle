@@ -5,6 +5,8 @@ allprojects {
         maven { url 'https://dl.bintray.com/napster/SqlSauce' }
         mavenLocal()                       // useful for developing
         maven { url "https://jitpack.io" } // build projects directly from github
+        maven { url "https://repo.spring.io/snapshot" }
+        maven { url "https://repo.spring.io/milestone" }
     }
 
     apply plugin: 'idea'
@@ -13,10 +15,15 @@ allprojects {
 
 subprojects {
     buildscript {
+        ext {
+            springBootVersion = '2.0.0.RC1'
+        }
         repositories {
-            maven {
-                url "https://plugins.gradle.org/m2/"
-            }
+            maven { url "https://plugins.gradle.org/m2/" }
+            maven { url 'http://repo.spring.io/plugins-release' }
+            maven { url "https://repo.spring.io/snapshot" }
+            maven { url "https://repo.spring.io/milestone" }
+            mavenCentral()
         }
         dependencies {
             //do not upgrade to 1.4.20, it fails builds randomly
@@ -24,6 +31,8 @@ subprojects {
             classpath "gradle.plugin.com.sedmelluq:jdaction:1.0.2"
             classpath "com.github.jengelman.gradle.plugins:shadow:2.0.2"
             classpath "org.junit.platform:junit-platform-gradle-plugin:1.0.2"
+            classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+            classpath 'io.spring.gradle:propdeps-plugin:0.0.9.RELEASE'
         }
     }
     apply plugin: 'java'
@@ -61,6 +70,7 @@ subprojects {
         togglzVersion               = '2.5.0.Final'
         guavaVersion                = '24.0-jre'
         bucket4jVersion             = '3.1.1'
+        gsonVersion                 = '2.8.2'
 
         //logging / monitoring deps
         logbackVersion              = '1.2.3'
@@ -76,7 +86,7 @@ subprojects {
         napsterAnnotations          = '0.0.1'
 
         //database deps
-        sqlsauceVersion             = '3aa99222963e5f586d8f35695d0ff30ac47ebd53'
+        sqlsauceVersion             = '6af53dd7293930a82231baa1bfe7d80ed7119b8f'
         hibernateVersion            = '5.2.13.Final'
         flywayVersion               = '5.0.7'
         dsProxyVersion              = '1.4.6'
