@@ -29,6 +29,7 @@ import fredboat.db.DatabaseManager;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 import space.npstr.sqlsauce.DatabaseWrapper;
@@ -52,6 +53,7 @@ public class DbConfig {
                 dbConfig.getCache().getJdbcUrl(), null);
     }
 
+    @Primary
     @Bean("mainDbWrapper")
     public DatabaseWrapper getMainDbWrapper(DatabaseManager databaseManager) {
         return databaseManager.getMainDbWrapper();
