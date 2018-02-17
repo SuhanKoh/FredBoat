@@ -42,11 +42,9 @@ public class BotController {
     private EventListenerBoat mainEventListener;
     private final StatsAgent statsAgent = new StatsAgent("bot metrics");
     private EntityIO entityIO;
-    private DatabaseWrapper mainDbWrapper;
+    @Nullable //will be null if the rest repos are used
+    private DatabaseInterface dbInterface;
     private int shutdownCode = UNKNOWN_SHUTDOWN_CODE;//Used when specifying the intended code for shutdown hooks
-
-    @Nullable //will be null if no cache database has been configured
-    private DatabaseWrapper cacheDbWrapper;
 
     /**
      * Initialises the event listener. This can't be done during construction,
@@ -92,32 +90,13 @@ public class BotController {
         this.entityIO = entityIO;
     }
 
-    @Nonnull
-    public DatabaseConnection getMainDbConnection() {
-        return mainDbWrapper.unwrap();
+    public void setDatabaseInterface(@Nonnull DatabaseInterface databaseInterface) {
+        this.dbInterface = databaseInterface;
     }
 
-    @Nonnull
-    public DatabaseWrapper getMainDbWrapper() {
-        return mainDbWrapper;
-    }
-
-    @Nullable
-    public DatabaseConnection getCacheDbConnection() {
-        return cacheDbWrapper != null ? cacheDbWrapper.unwrap() : null;
-    }
-
-    @Nullable
-    public DatabaseWrapper getCacheDbWrapper() {
-        return cacheDbWrapper;
-    }
-
-    public void setMainDbWrapper(@Nonnull DatabaseWrapper mainDbWrapper) {
-        this.mainDbWrapper = mainDbWrapper;
-    }
-
-    public void setCacheDbWrapper(@Nullable DatabaseWrapper cacheDbWrapper) {
-        this.cacheDbWrapper = cacheDbWrapper;
+    @Nullable //null if not initialized yet, or alot more likely, using rest repos instead of direct connection
+    public DatabaseInterface getDatabaseInterface() {
+        return dbInterface;
     }
 
     public void shutdown(int code) {
@@ -142,16 +121,49 @@ public class BotController {
         shardManager.shutdown();
 
         executor.shutdown();
-        if (cacheDbWrapper != null) {
-            cacheDbWrapper.unwrap().shutdown();
-        }
-        if (mainDbWrapper != null) {
+        if (dbInterface != null) {
+            DatabaseWrapper cacheDbWrapper = dbInterface.getCacheDbWrapper();
+            if (cacheDbWrapper != null) {
+                cacheDbWrapper.unwrap().shutdown();
+            }
+            DatabaseWrapper mainDbWrapper = dbInterface.getMainDbWrapper();
             mainDbWrapper.unwrap().shutdown();
         }
     };
 
     public int getShutdownCode() {
         return shutdownCode;
+    }
+
+    public static class DatabaseInterface {
+        private final DatabaseWrapper mainDbWrapper;
+        @Nullable //will be null if no cache database has been configured
+        private final DatabaseWrapper cacheDbWrapper;
+
+        public DatabaseInterface(@Nonnull DatabaseWrapper mainDb, @Nullable DatabaseWrapper cacheDb) {
+            this.mainDbWrapper = mainDb;
+            this.cacheDbWrapper = cacheDb;
+        }
+
+        @Nonnull
+        public DatabaseConnection getMainDbConnection() {
+            return mainDbWrapper.unwrap();
+        }
+
+        @Nonnull
+        public DatabaseWrapper getMainDbWrapper() {
+            return mainDbWrapper;
+        }
+
+        @Nullable
+        public DatabaseConnection getCacheDbConnection() {
+            return cacheDbWrapper != null ? cacheDbWrapper.unwrap() : null;
+        }
+
+        @Nullable
+        public DatabaseWrapper getCacheDbWrapper() {
+            return cacheDbWrapper;
+        }
     }
 
 }

@@ -25,11 +25,14 @@
 
 package fredboat.db;
 
+import com.google.gson.Gson;
 import fredboat.db.api.*;
 import fredboat.db.entity.cache.SearchResult;
 import fredboat.db.entity.main.*;
 import fredboat.db.repositories.api.*;
 import fredboat.db.repositories.impl.*;
+import fredboat.db.repositories.impl.rest.*;
+import fredboat.main.BotController;
 import fredboat.util.DiscordUtil;
 import fredboat.util.func.NonnullSupplier;
 import net.dv8tion.jda.core.entities.Guild;
@@ -65,8 +68,19 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
     @Nullable
     private final ISearchResultRepo searchResultRepo;
 
+    public EntityIO(String apiBasePath) {
+        Gson gson = new Gson();
+        guildConfigRepo = new RestGuildConfigRepo(apiBasePath, BotController.HTTP, gson);
+        guildDataRepo = new RestGuildDataRepo(apiBasePath, BotController.HTTP, gson);
+        guildModulesRepo = new RestGuildModulesRepo(apiBasePath, BotController.HTTP, gson);
+        guildPermsRepo = new RestGuildPermsRepo(apiBasePath, BotController.HTTP, gson);
+        prefixRepo = new RestPrefixRepo(apiBasePath, BotController.HTTP, gson);
+        blacklistRepo = new RestBlacklistRepo(apiBasePath, BotController.HTTP, gson);
+        searchResultRepo = new RestSearchResultRepo(apiBasePath, BotController.HTTP, gson);
+    }
+
     public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper) {
-        guildConfigRepo = new RestGuildConfigRepo("http://localhost:8080/v1/guildconfig");
+        guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);
         guildDataRepo = new SqlSauceGuildDataRepo(mainWrapper);
         guildModulesRepo = new SqlSauceGuildModulesRepo(mainWrapper);
         guildPermsRepo = new SqlSauceGuildPermsRepo(mainWrapper);

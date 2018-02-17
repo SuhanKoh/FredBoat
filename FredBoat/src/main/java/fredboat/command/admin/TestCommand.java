@@ -60,7 +60,12 @@ public class TestCommand extends Command implements ICommandRestricted {
 
     @Override
     public void onInvoke(@Nonnull CommandContext context) {
-        BotController.INS.getExecutor().submit(() -> invoke(BotController.INS.getMainDbConnection(), context, context.args));
+        BotController.DatabaseInterface databaseInterface = BotController.INS.getDatabaseInterface();
+        if (databaseInterface == null) {//todo test rest repos instead?
+            context.reply("No direct database connection has been set up for this bot that could be stress tested.");
+            return;
+        }
+        BotController.INS.getExecutor().submit(() -> invoke(databaseInterface.getMainDbConnection(), context, context.args));
     }
 
     boolean invoke(DatabaseConnection dbConn, Context context, String args[]) {

@@ -135,6 +135,7 @@ public class Config {
     // Undocumented creds
     private String carbonKey;
     private String dikeUrl;
+    private String backendUrl;
 
     //Derived Config values
     private int hikariPoolSize;
@@ -366,6 +367,7 @@ public class Config {
             // Undocumented creds
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
             dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
+            backendUrl = (String) creds.getOrDefault("backendUrl", "");
 
 
             // Derived Config values
@@ -654,5 +656,10 @@ public class Config {
     @Nullable
     public String getDikeUrl() {
         return dikeUrl;
+    }
+
+    //empty string for no backend
+    public String getBackendUrl() {
+        return backendUrl;
     }
 }
