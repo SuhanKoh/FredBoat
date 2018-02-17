@@ -23,17 +23,38 @@
  * SOFTWARE.
  */
 
-package fredboat.db.repositories.impl;
+package fredboat.db.repositories.impl.rest;
 
-import fredboat.db.entity.main.GuildConfig;
-import fredboat.db.repositories.api.IGuildConfigRepo;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import fredboat.db.entity.main.BlacklistEntry;
+import fredboat.db.repositories.api.IBlacklistRepo;
+import fredboat.util.rest.Http;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by napster on 17.02.18.
  */
-public class RestGuildConfigRepo extends RestRepo<String, GuildConfig> implements IGuildConfigRepo {
+public class RestBlacklistRepo extends RestRepo<Long, BlacklistEntry> implements IBlacklistRepo {
 
-    public RestGuildConfigRepo(String path) {
-        super(path, GuildConfig.class);
+    public static final String PATH = "/blacklist";
+
+    public RestBlacklistRepo(String apiBasePath, Http http, Gson gson) {
+        super(apiBasePath + PATH, BlacklistEntry.class, http, gson);
+    }
+
+    @Override
+    public List<BlacklistEntry> loadBlacklist() {
+        try {
+            Http.SimpleRequest get = http.get(path + "/loadall");
+            return gson.fromJson(get.asString(), new TypeToken<List<BlacklistEntry>>() {
+            }.getType());
+        } catch (IOException e) {  //todo decide on error handling strategy
+            log.error("Could not load the blacklist", e);
+            return Collections.emptyList();
+        }
     }
 }
