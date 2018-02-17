@@ -66,7 +66,7 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
     private final ISearchResultRepo searchResultRepo;
 
     public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper) {
-        guildConfigRepo = new SqlSauceGuildConfigRepo(mainWrapper);
+        guildConfigRepo = new RestGuildConfigRepo("http://localhost:8080/v1/guildconfig");
         guildDataRepo = new SqlSauceGuildDataRepo(mainWrapper);
         guildModulesRepo = new SqlSauceGuildModulesRepo(mainWrapper);
         guildPermsRepo = new SqlSauceGuildPermsRepo(mainWrapper);

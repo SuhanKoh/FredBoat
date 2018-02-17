@@ -31,6 +31,9 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import space.npstr.sqlsauce.DatabaseWrapper;
+
+import javax.annotation.Nullable;
 
 /**
  * Created by napster on 16.02.18.
@@ -41,12 +44,23 @@ public class DbConfig {
 
     @Bean("databaseManager")
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    DatabaseManager getDatabaseManager(DbConfig dbConfig) {
+    public DatabaseManager getDatabaseManager(DbConfig dbConfig) {
         //todo improve these parameters
         return new DatabaseManager(null, null,
                 4, "Backend", true,
                 dbConfig.getMain().getJdbcUrl(), null,
                 dbConfig.getCache().getJdbcUrl(), null);
+    }
+
+    @Bean("mainDbWrapper")
+    public DatabaseWrapper getMainDbWrapper(DatabaseManager databaseManager) {
+        return databaseManager.getMainDbWrapper();
+    }
+
+    @Nullable
+    @Bean("cacheDbWrapper")
+    public DatabaseWrapper getCacheDbWrapper(DatabaseManager databaseManager) {
+        return databaseManager.getCacheDbWrapper();
     }
 
     private final Main main = new Main();
