@@ -32,9 +32,11 @@ import fredboat.db.entity.main.*;
 import fredboat.db.repositories.api.*;
 import fredboat.db.repositories.impl.*;
 import fredboat.db.repositories.impl.rest.*;
+import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
 import fredboat.util.DiscordUtil;
 import fredboat.util.func.NonnullSupplier;
+import fredboat.util.rest.Http;
 import net.dv8tion.jda.core.entities.Guild;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -70,13 +72,21 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
 
     public EntityIO(String apiBasePath) {
         Gson gson = new Gson();
-        guildConfigRepo = new RestGuildConfigRepo(apiBasePath, BotController.HTTP, gson);
-        guildDataRepo = new RestGuildDataRepo(apiBasePath, BotController.HTTP, gson);
-        guildModulesRepo = new RestGuildModulesRepo(apiBasePath, BotController.HTTP, gson);
-        guildPermsRepo = new RestGuildPermsRepo(apiBasePath, BotController.HTTP, gson);
-        prefixRepo = new RestPrefixRepo(apiBasePath, BotController.HTTP, gson);
-        blacklistRepo = new RestBlacklistRepo(apiBasePath, BotController.HTTP, gson);
-        searchResultRepo = new RestSearchResultRepo(apiBasePath, BotController.HTTP, gson);
+        Http http = BotController.HTTP;
+        guildConfigRepo = new RestGuildConfigRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "guildConfigRepo");
+        guildDataRepo = new RestGuildDataRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "guildDataRepo");
+        guildModulesRepo = new RestGuildModulesRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "guildModulesRepo");
+        guildPermsRepo = new RestGuildPermsRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "guildPermsRepo");
+        prefixRepo = new RestPrefixRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "prefixRepo");
+        blacklistRepo = new RestBlacklistRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "blacklistRepo");
+        searchResultRepo = new RestSearchResultRepo(apiBasePath, http, gson)
+                .registerCacheStats(Metrics.instance().cacheMetrics, "searchResultRepo");
     }
 
     public EntityIO(DatabaseWrapper mainWrapper, @Nullable DatabaseWrapper cacheWrapper) {
