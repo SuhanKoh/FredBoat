@@ -34,6 +34,7 @@ import fredboat.db.repositories.impl.*;
 import fredboat.db.repositories.impl.rest.*;
 import fredboat.feature.metrics.Metrics;
 import fredboat.main.BotController;
+import fredboat.main.Config;
 import fredboat.util.DiscordUtil;
 import fredboat.util.func.NonnullSupplier;
 import fredboat.util.rest.Http;
@@ -73,19 +74,20 @@ public class EntityIO implements IBlacklistIO, IGuildConfigIO, IGuildDataIO, IGu
     public EntityIO(String apiBasePath) {
         Gson gson = new Gson();
         Http http = BotController.HTTP;
-        guildConfigRepo = new RestGuildConfigRepo(apiBasePath, http, gson)
+        String auth = Config.CONFIG.getBackendBasicAuth();
+        guildConfigRepo = new RestGuildConfigRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "guildConfigRepo");
-        guildDataRepo = new RestGuildDataRepo(apiBasePath, http, gson)
+        guildDataRepo = new RestGuildDataRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "guildDataRepo");
-        guildModulesRepo = new RestGuildModulesRepo(apiBasePath, http, gson)
+        guildModulesRepo = new RestGuildModulesRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "guildModulesRepo");
-        guildPermsRepo = new RestGuildPermsRepo(apiBasePath, http, gson)
+        guildPermsRepo = new RestGuildPermsRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "guildPermsRepo");
-        prefixRepo = new RestPrefixRepo(apiBasePath, http, gson)
+        prefixRepo = new RestPrefixRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "prefixRepo");
-        blacklistRepo = new RestBlacklistRepo(apiBasePath, http, gson)
+        blacklistRepo = new RestBlacklistRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "blacklistRepo");
-        searchResultRepo = new RestSearchResultRepo(apiBasePath, http, gson)
+        searchResultRepo = new RestSearchResultRepo(apiBasePath, http, gson, auth)
                 .registerCacheStats(Metrics.instance().cacheMetrics, "searchResultRepo");
     }
 

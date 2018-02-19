@@ -32,6 +32,7 @@ import fredboat.commandmeta.CommandInitializer;
 import fredboat.commandmeta.MessagingException;
 import fredboat.shared.constant.DistributionEnum;
 import fredboat.util.DiscordUtil;
+import okhttp3.Credentials;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,10 +137,13 @@ public class Config {
     private String carbonKey;
     private String dikeUrl;
     private String backendUrl;
+    private String backendUser;
+    private String backendPass;
 
     //Derived Config values
     private int hikariPoolSize;
     private int numShards;
+    private String backendAuth;
 
     @SuppressWarnings("unchecked")
     public Config(File credentialsFile, File configFile) {
@@ -368,6 +372,8 @@ public class Config {
             carbonKey = (String) creds.getOrDefault("carbonKey", "");
             dikeUrl = (String) creds.getOrDefault("dikeUrl", null);
             backendUrl = (String) creds.getOrDefault("backendUrl", "");
+            backendUser = (String) creds.getOrDefault("backendUser", "");
+            backendPass = (String) creds.getOrDefault("backendPass", "");
 
 
             // Derived Config values
@@ -392,6 +398,8 @@ public class Config {
             //http://www.dailymotion.com/video/x2s8uec_oltp-performance-concurrent-mid-tier-connections_tech
             hikariPoolSize = Math.max(4, Runtime.getRuntime().availableProcessors());
             log.info("Hikari max pool size set to " + hikariPoolSize);
+
+            backendAuth = Credentials.basic(backendUser, backendPass);//this is a hotpath, doing this only once by precomputing it is benefitial
 
             PlayerLimitManager.setLimit((Integer) config.getOrDefault("playerLimit", -1));
         } catch (IOException e) {
@@ -661,5 +669,17 @@ public class Config {
     //empty string for no backend
     public String getBackendUrl() {
         return backendUrl;
+    }
+
+    public String getBackendUser() {
+        return backendUser;
+    }
+
+    public String getBackendPass() {
+        return backendPass;
+    }
+
+    public String getBackendBasicAuth() {
+        return backendAuth;
     }
 }
